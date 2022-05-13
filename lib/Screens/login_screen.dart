@@ -21,19 +21,31 @@ class loginScreen extends StatelessWidget {
             }else if(snapshot.hasError){
               return Center(child: Text("Something Went Wrong!"),);
             }else{
-              return Scaffold(
-                body: SafeArea(
-                    child: Center(child: ElevatedButton.icon(icon:FaIcon(FontAwesomeIcons.google),label:Text("Sign in with Google"),onPressed: (){
-                      final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
-                      provider.googleLogin();
-                    },style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
-                    ),))
-                ),
-              );
+              return loginPage();
             }
           }
         )
+    );
+  }
+}
+
+class loginPage extends StatelessWidget {
+  const loginPage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+          child: Center(child: ElevatedButton.icon(icon:FaIcon(FontAwesomeIcons.google),label:Text("Sign in with Google"),onPressed: (){
+            final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
+            provider.googleLogin();
+          },style: ElevatedButton.styleFrom(
+            primary: Colors.black,
+          ),))
+
+      ),
     );
   }
 }
