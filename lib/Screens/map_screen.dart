@@ -1,10 +1,13 @@
 import 'dart:ffi';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
+import 'package:mmproto/Screens/loading_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -69,6 +72,8 @@ class _MapScreenState extends State<MapScreen> {
 
 
   Widget build(BuildContext context) {
+
+    final _currentUser = FirebaseAuth.instance.currentUser!;
 
     Completer<GoogleMapController> _controller = Completer();
 
@@ -204,7 +209,7 @@ class _MapScreenState extends State<MapScreen> {
 
                 context: context,
                 isScrollControlled: true,
-                builder: (BuildContext context) => BformSheet(),
+                builder: (BuildContext context) => BformSheet(latLng: val,user:_currentUser.uid),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                       topRight: Radius.circular(15),
@@ -481,21 +486,63 @@ class Bsheet extends StatelessWidget {
 
 class BformSheet extends StatefulWidget {
   BformSheet({
-    Key? key,
-  }) : super(key: key);
+    required this.latLng,required this.user,
+  }) ;
+  final LatLng latLng;
+  final String user;
 
   @override
   State<BformSheet> createState() => _BformSheetState();
 }
 
 class _BformSheetState extends State<BformSheet> {
-  Object? val;
+  Object? val=false;
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData queryData = MediaQuery.of(context);
-    final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
-    bool _opt = provider.isTicketSelling;
+      final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
+    // bool _opt = provider.isTicketSelling;
+
+    final TextEditingController _tControllerTitle = TextEditingController();
+    final TextEditingController _tControllerDate = TextEditingController();
+    final TextEditingController _tControllerTime = TextEditingController();
+    final TextEditingController _tControllerArt = TextEditingController();
+    final TextEditingController _tControllerDesc = TextEditingController();
+    final TextEditingController _tControllerTicket = TextEditingController();
+     String _title ;
+     String _date ;
+     String _time ;
+     String _art ;
+     String _desc ;
+
+
+    Future<dynamic> createEvent(
+        {required String user,required LatLng latLng,
+          required String title,
+          required String date,
+          required String time,
+          required String desc,
+          required String art,
+        })async{
+
+      final json = {
+        'user':user,
+        'marker':latLng.toString(),
+        'title':title,
+        'date':date,
+        'time':time,
+        'desc':desc,
+        'art':art
+      };
+      provider.switchRadio(json);
+      // print(json);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoadingScreen(func: provider.dataToServer())));
+
+    };
+
+
+
 
     return Padding(
       padding: queryData.viewInsets,
@@ -507,7 +554,7 @@ class _BformSheetState extends State<BformSheet> {
                 bottomRight: Radius.circular(0),
                 bottomLeft: Radius.circular(0))),
         margin: EdgeInsets.only(left: 30, top: 40, bottom: 0, right: 30),
-        height: queryData.size.height * 0.750,
+        height: queryData.size.height * 0.70,
         child: SingleChildScrollView(
 
           child: Column(
@@ -533,12 +580,15 @@ class _BformSheetState extends State<BformSheet> {
               SizedBox(
                 height: 40,
               ),
+
+
               SizedBox(
                 width: queryData.size.width * 0.6,
                 height: 50,
                 child: TextField(
+                  controller: _tControllerTitle,
                   onChanged: (val) {
-
+                    _title = val;
                   },
 
                   decoration: InputDecoration(
@@ -553,6 +603,8 @@ class _BformSheetState extends State<BformSheet> {
               SizedBox(
                 height: 40,
               ),
+
+
               Row(mainAxisAlignment: MainAxisAlignment.center,
 
                 children: [
@@ -560,8 +612,9 @@ class _BformSheetState extends State<BformSheet> {
                     width: queryData.size.width * 0.4,
                     height: 50,
                     child: TextField(
+                      controller: _tControllerDate,
                       onChanged: (val) {
-
+                          _date=val;
                       },
 
                       decoration: InputDecoration(
@@ -581,7 +634,9 @@ class _BformSheetState extends State<BformSheet> {
                     width: queryData.size.width * 0.4,
                     height: 50,
                     child: TextField(
+                      controller: _tControllerTime,
                       onChanged: (val) {
+                        _time=val;
 
                       },
 
@@ -599,11 +654,14 @@ class _BformSheetState extends State<BformSheet> {
               SizedBox(
                 height: 40,
               ),
+
               SizedBox(
                 width: queryData.size.width * 0.6,
                 height: 50,
                 child: TextField(
+                  controller: _tControllerArt,
                   onChanged: (val) {
+                    _art=val;
 
                   },
 
@@ -625,7 +683,9 @@ class _BformSheetState extends State<BformSheet> {
                 child: TextField(
                   minLines: 6,
                   maxLines: 25,
+                  controller: _tControllerDesc,
                   onChanged: (val) {
+                    _desc=val;
 
                   },
 
@@ -646,42 +706,20 @@ class _BformSheetState extends State<BformSheet> {
               SizedBox(
                 height: 40,
               ),
-              Row(children: [
-                Text("Is Ticket Selling ?",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black.withOpacity(.65)
-
-                ),),
-                Row(children: [
-                  Radio(
-                      value: true,
-                      groupValue: val,
-                      onChanged: (value) {
-                        setState(() {
-                          val = value;
-                        });
-                      }),
-                  Text("Yes"),
-
-                ],),
-                Row(children: [
-                  Radio(
-                      value: false,
-                      groupValue: val,
-                      onChanged: (value) {
-                        setState(() {
-                          val = value;
-                        });
-                      }),
-                  Text("No"),
-
-                ],),
-  ]),
+  //             Row(children: [
+  //               Text("Is Ticket Selling ?",
+  //                 style: TextStyle(
+  //                   fontSize: 16,
+  //                   color: Colors.black.withOpacity(.65)
+  //
+  //
+  //               ),),
+  //
+  // ]),
 
               GestureDetector(
                 onTap: () {
-
+                    createEvent(user:widget.user,latLng:widget.latLng,title:_tControllerTitle.value.text,date:_tControllerDate.value.text,time:_tControllerTime.value.text,desc:_tControllerDesc.value.text,art: _tControllerArt.value.text);
                 },
                 child: Text(
                   "Verify →",

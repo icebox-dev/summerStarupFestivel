@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,11 +32,23 @@ class GoogleSignInProvider extends ChangeNotifier{
   }
 
   bool isTicketSelling = false;
-  void switchRadio(){
-    isTicketSelling ? isTicketSelling=false:isTicketSelling=true;
+  var data;
+  void switchRadio(value){
+    data=value;
     notifyListeners();
+  }
+  bool showStatus(){
+    notifyListeners();
+    return isTicketSelling;
+
+  }
+
+  Future<void> dataToServer()async{
+    final event = FirebaseFirestore.instance.collection("event").doc();
+    await event.set(data);
   }
 
 
 
 }
+
