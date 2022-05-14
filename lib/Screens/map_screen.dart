@@ -8,10 +8,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:mmproto/Screens/loading_screen.dart';
+import 'package:mmproto/Screens/login_screen.dart';
+import 'package:mmproto/Screens/title_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 import '../Provider/google_sign_in.dart';
+
+
+
 
 
 class MapScreen extends StatefulWidget {
@@ -35,45 +40,75 @@ class _MapScreenState extends State<MapScreen> {
   double lat = 10.525252080548244;
   double long = 76.21449784404028;
 
-  List arr = [{"latLong":LatLng(10.525252080548244+1, 76.21449784404028),"id":"1","pid":"sdfgjuy"},
-    {"latLong":LatLng(10.525252080548244-1, 76.21449784404028),"id":"2","pid":"sdfgjuy"},
-    {"latLong":LatLng(10.525252080548244, 76.21449784404028),"id":"3","pid":"sdfgjuy"},
-    {"latLong":LatLng(10.525252080548244, 76.21449784404028-1),"id":"4","pid":"sdfgjuy"},
-    {"latLong":LatLng(10.525252080548244, 76.21449784404028+1),"id":"5","pid":"sdfgjuy"}];
 
-  void kkk(){
-    for(int i = 0;i<=4;i++){
-      _marker.add(buildMarker(context, arr[i]["latLong"], arr[i]["id"], arr[i]["pid"]));
 
-    }
+
+
+
+
+  
+  List arr = [
+    // {"latLong":LatLng(10.525252080548244+1, 76.21449784404028),"id":"1","pid":"sdfgjuy"},
+    // {"latLong":LatLng(10.525252080548244-1, 76.21449784404028),"id":"2","pid":"sdfgjuy"},
+    // {"latLong":LatLng(10.525252080548244, 76.21449784404028),"id":"3","pid":"sdfgjuy"},
+    // {"latLong":LatLng(10.525252080548244, 76.21449784404028-1),"id":"4","pid":"sdfgjuy"},
+    // {"latLong":LatLng(10.525252080548244, 76.21449784404028+1),"id":"5","pid":"sdfgjuy"}
+  ];
+  late List<DocumentSnapshot> docs;
+
+  Future<dynamic> fetchEvent() async{
+    print("-----------------------------------------------------------------------------------------------------------------------------------");
+    final docRef = await FirebaseFirestore.instance.collection("event").get().then(
+          (res) {
+            print("dat collected");
+            docs = res.docs;
+            // // arr= docs;
+            // print(docs[0]["marker"]);
+            // print(docs.length);
+            for(int i=0;i<docs.length;i++){
+              double latitude = double.parse(docs[i]["marker"].substring(7,docs[i]["marker"].length-1).split(', ')[0]);
+              double longitude = double.parse(docs[i]["marker"].substring(7,docs[i]["marker"].length-1).split(', ')[1]);
+              // print(latitude);
+              // print(longitude);
+              // print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                    _marker.add(buildMarker(context, LatLng(latitude, longitude),docs[i]["id"] , docs[i]["title"]));
+
+            }
+            setState(() {
+
+            });
+          },
+      onError: (e) => print("Error completing: $e"),
+    );
+
+
+    // print(arr);
+  }
+
+  void sample () async{
+    await fetchEvent();
   }
 
 
   @override
   initState(){
-    kkk();
+    sample();
+    print("-----------------------------------------------------------------------------------------------------------------------******");
+    print(_marker);
+
     super.initState();
   }
 
-  // void LocatingMe()async{
-  //
-  //   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  //   currentLocation = position;
-  //   latLongPosition=  LatLng(position.latitude, position.longitude);
-  //
-  //   // CameraPosition cameraPostion = CameraPosition(target: latLongPosition,zoom: 15);
-  // }
-  // late Position currentLocation;
-  //late LatLng latLongPosition;
-
-
-  int count = 0;
 
 
 
   Widget build(BuildContext context) {
 
     final _currentUser = FirebaseAuth.instance.currentUser!;
+    if (_currentUser == null){
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>loginScreen()));
+    }
+
 
     Completer<GoogleMapController> _controller = Completer();
 
@@ -123,6 +158,7 @@ class _MapScreenState extends State<MapScreen> {
 
       final GoogleMapController controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
       return _location;
 
     }
@@ -186,45 +222,47 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: GoogleMap( mapType: MapType.normal,
-          // onTap: (LatLng val){
-          //   print(val);
-          //   Marker newMarker = Marker(markerId:MarkerId("$count") ,position:LatLng(val.latitude,val.longitude),infoWindow: InfoWindow(title: "new"));
-          //   //
-          //   _newMarker.add(newMarker);
-          //   // _marker.addAll(_newMarker);
-          //
-          //
-          //
-          //   // print(count);
-          //   count++;
-          //   // print(_marker.length);
-          //   // print(_newMarker.length);
-          //   // print(_marker);
-          //
-          //   setState(() {});
-          // },
-          onLongPress: (val){
-            showModalBottomSheet(
+        child:
+        Stack(
+          children: [
+            GoogleMap( mapType: MapType.normal,
+              onLongPress: (val){
+                showModalBottomSheet(
 
-                context: context,
-                isScrollControlled: true,
-                builder: (BuildContext context) => BformSheet(latLng: val,user:_currentUser.uid),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(15),
-                      topLeft: Radius.circular(15)),
-                ));
-          },
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) => BformSheet(latLng: val,user:_currentUser.uid),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(15),
+                          topLeft: Radius.circular(15)),
+                    ));
+              },
 
-          initialCameraPosition: _kGooglePlex,
-          myLocationEnabled: true,
-          // myLocationButtonEnabled: true,
-          zoomControlsEnabled: false,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-          markers:_marker.map((e) => e).toSet(),
+              initialCameraPosition: _kGooglePlex,
+              myLocationEnabled: true,
+              // myLocationButtonEnabled: true,
+              zoomControlsEnabled: false,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+              markers:_marker.map((e) => e).toSet(),
+            ),Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextButton(onLongPress: (){
+                setState(() {
+
+                });
+              }
+                  ,onPressed: (){
+                final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
+                provider.logout();
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>loginScreen()));
+              },
+                  child: Text("LogOut",style: TextStyle(fontSize: 20),)),
+            ),
+
+          ],
         ),
       ),
       floatingActionButton: Transform.scale(
@@ -481,8 +519,6 @@ class Bsheet extends StatelessWidget {
     );
   }
 }
-
-
 
 class BformSheet extends StatefulWidget {
   BformSheet({

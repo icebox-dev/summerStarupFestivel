@@ -13,8 +13,7 @@ class TitleScreen extends StatelessWidget {
         child: Center(
           child: FloatingActionButton(
             child: Text("LogOut"),onPressed: (){
-            final provider = Provider.of<GoogleSignInProvider>(context,listen:false);
-            provider.logout();
+
           },
           ),
         ),

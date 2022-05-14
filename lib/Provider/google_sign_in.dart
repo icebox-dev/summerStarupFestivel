@@ -45,8 +45,26 @@ class GoogleSignInProvider extends ChangeNotifier{
 
   Future<void> dataToServer()async{
     final event = FirebaseFirestore.instance.collection("event").doc();
-    await event.set(data);
+    final json = {
+      'id':event.id,
+      'user':data['user'],
+      'marker':data['marker'],
+      'title':data['title'],
+      'date':data['date'],
+      'time':data['time'],
+      'desc':data['desc'],
+      'art':data['art']
+    };
+
+    await event.set(json);
   }
+
+
+
+  // Future<QuerySnapshot?> dataFromServer()async{
+  //   return eventData;
+  //
+  // }
 
 
 
