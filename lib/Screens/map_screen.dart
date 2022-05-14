@@ -68,10 +68,10 @@ class _MapScreenState extends State<MapScreen> {
             for(int i=0;i<docs.length;i++){
               double latitude = double.parse(docs[i]["marker"].substring(7,docs[i]["marker"].length-1).split(', ')[0]);
               double longitude = double.parse(docs[i]["marker"].substring(7,docs[i]["marker"].length-1).split(', ')[1]);
-              // print(latitude);
+              print(docs[i]["title"].runtimeType);
               // print(longitude);
               // print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                    _marker.add(buildMarker(context, LatLng(latitude, longitude),docs[i]["id"] , docs[i]["title"]));
+                    _marker.add(buildMarker(context, LatLng(latitude, longitude),docs[i]["id"] , docs[i]["title"],docs[i]["desc"],docs[i]["date"],docs[i]["time"]));
 
             }
             setState(() {
@@ -279,18 +279,19 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Marker buildMarker(BuildContext context,LatLng latLng,String id,String pid) {
+  Marker buildMarker(BuildContext context,LatLng latLng,String id,String title,String desc, String date, String time ) {
+
 
     return Marker(markerId: MarkerId(id),
         position: latLng,
         infoWindow: const InfoWindow(
-            title: "you are here"
+            title: "title",
         ),
         onTap: (){
           showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              builder: (BuildContext context) => Bsheet(),
+              builder: (BuildContext context) => Bsheet(title: title,desc:desc,date: date,time: time,),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(15),
@@ -304,9 +305,13 @@ class _MapScreenState extends State<MapScreen> {
 
 
 class Bsheet extends StatelessWidget {
-  const Bsheet({
-    Key? key,
-  }) : super(key: key);
+  const Bsheet({required this.title , required this.desc , required this.date,required this.time
+  });
+  final String title;
+  final String desc;
+  final String date;
+  final String time;
+
 
   @override
   Widget build(BuildContext context) {
@@ -320,68 +325,33 @@ class Bsheet extends StatelessWidget {
               bottomRight: Radius.circular(0),
               bottomLeft: Radius.circular(0))),
       margin: EdgeInsets.only(left: 30, top: 40, bottom: 0, right: 30),
-      height: double.maxFinite < queryData.size.height * 0.750 ? null:queryData.size.height * 0.750,
+      //height: double.maxFinite < queryData.size.height * 0.750 ? null:queryData.size.height * 0.750,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "J",
+              title,
               style: TextStyle(
+                color: Color(0xff001E6C),
                 wordSpacing: 2,
-                fontSize: 25,
-                fontWeight: FontWeight.normal,
+                fontSize: 45,
+                fontWeight: FontWeight.w900,
               ),
             ),
+            SizedBox(height: 10,),
+
             Text(
-              "we got you covered !",
+              "description : $desc",
               style: TextStyle(
                 fontSize: 25,
                 wordSpacing: 2,
                 fontWeight: FontWeight.normal,
               ),
             ),
-            SizedBox(
-              height: 40,
-            ),
-            SizedBox(
-              width: queryData.size.width * 0.6,
-              height: 50,
-              child: TextField(
-                onChanged: (val) {
-
-                },
-                decoration: InputDecoration(
-                    hintText: "tcr*******@gectcr.ac.in",
-                    hintStyle: TextStyle(letterSpacing: 3),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text(
-                "Verify →",
-                textAlign: TextAlign.right,
-                style: TextStyle(fontSize: 20, color: Colors.blueAccent),
-              ),
-            ),
+            SizedBox(height: 10,),
             Text(
-              "Just the mail,",
-              style: TextStyle(
-                wordSpacing: 2,
-                fontSize: 25,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Text(
-              "we got you covered !",
+              "date and time : $date & $time ",
               style: TextStyle(
                 fontSize: 25,
                 wordSpacing: 2,
@@ -391,128 +361,22 @@ class Bsheet extends StatelessWidget {
             SizedBox(
               height: 40,
             ),
-            SizedBox(
-              width: queryData.size.width * 0.6,
-              height: 50,
-              child: TextField(
-                onChanged: (val) {
 
-                },
-                decoration: InputDecoration(
-                    hintText: "tcr*******@gectcr.ac.in",
-                    hintStyle: TextStyle(letterSpacing: 3),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
-            ),
             SizedBox(
               height: 40,
             ),
-            GestureDetector(
-              onTap: () {
+            // GestureDetector(
+            //   onTap: () {
+            //
+            //   },
+            //   child: Text(
+            //     "Verify →",
+            //     textAlign: TextAlign.right,
+            //     style: TextStyle(fontSize: 20, color: Colors.blueAccent),
+            //   ),
+            // ),
+            SizedBox(height: 50,)
 
-              },
-              child: Text(
-                "Verify →",
-                textAlign: TextAlign.right,
-                style: TextStyle(fontSize: 20, color: Colors.blueAccent),
-              ),
-            ),
-            Text(
-              "Just the mail,",
-              style: TextStyle(
-                wordSpacing: 2,
-                fontSize: 25,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Text(
-              "we got you covered !",
-              style: TextStyle(
-                fontSize: 25,
-                wordSpacing: 2,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            SizedBox(
-              width: queryData.size.width * 0.6,
-              height: 50,
-              child: TextField(
-                onChanged: (val) {
-
-                },
-                decoration: InputDecoration(
-                    hintText: "tcr*******@gectcr.ac.in",
-                    hintStyle: TextStyle(letterSpacing: 3),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text(
-                "Verify →",
-                textAlign: TextAlign.right,
-                style: TextStyle(fontSize: 20, color: Colors.blueAccent),
-              ),
-            ),
-            Text(
-              "Just the mail,",
-              style: TextStyle(
-                wordSpacing: 2,
-                fontSize: 25,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Text(
-              "we got you covered !",
-              style: TextStyle(
-                fontSize: 25,
-                wordSpacing: 2,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            SizedBox(
-              width: queryData.size.width * 0.6,
-              height: 50,
-              child: TextField(
-                onChanged: (val) {
-
-                },
-                decoration: InputDecoration(
-                    hintText: "tcr*******@gectcr.ac.in",
-                    hintStyle: TextStyle(letterSpacing: 3),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            GestureDetector(
-              onTap: () {
-
-              },
-              child: Text(
-                "Verify →",
-                textAlign: TextAlign.right,
-                style: TextStyle(fontSize: 20, color: Colors.blueAccent),
-              ),
-            ),
           ],
         ),
       ),
