@@ -17,6 +17,7 @@ class loginScreen extends StatelessWidget {
             if(snapshot.connectionState == ConnectionState.waiting){
               return Center(child: CircularProgressIndicator(),);}
             else if(snapshot.hasData){
+              print(snapshot.data);
               return MapScreen();
             }else if(snapshot.hasError){
               return Center(child: Text("Something Went Wrong!"),);

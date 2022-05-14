@@ -30,4 +30,12 @@ class GoogleSignInProvider extends ChangeNotifier{
     await FirebaseAuth.instance.signOut();
   }
 
+  bool isTicketSelling = false;
+  void switchRadio(){
+    isTicketSelling ? isTicketSelling=false:isTicketSelling=true;
+    notifyListeners();
+  }
+
+
+
 }
