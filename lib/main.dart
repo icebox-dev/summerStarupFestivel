@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'Provider/google_sign_in.dart';
 import 'Screens/Navigator_screen.dart';
 
+
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async{
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: NavigatorScreen(),
+      home: loginScreen(),
     ),);
   }
 
